@@ -8,4 +8,4 @@ const groupShcema = new Schema(
   { timestamps: true, versionKey: false },
 );
 
-export const Group = model('Group', groupShcema);
+export const GroupsCollection = model('Group', groupShcema);
