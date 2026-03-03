@@ -2,6 +2,8 @@ import createHttpError from 'http-errors';
 import { UsersCollection } from '../db/models/User.js';
 import { GroupsCollection } from '../db/models/Group.js';
 import bcrypt from 'bcrypt';
+import { SessionsCollection } from '../db/models/Session.js';
+import { createSession } from '../utils/createSession.js';
 
 export const registerUser = async ({ name, email, password, groupId }) => {
   const user = await UsersCollection.findOne({ email });
@@ -16,5 +18,28 @@ export const registerUser = async ({ name, email, password, groupId }) => {
     passwordHash: encryptedPassword,
     groupId,
     role: 'user',
+  });
+};
+
+export const loginUser = async ({ email, password }) => {
+  const user = await UsersCollection.findOne({ email });
+
+  if (!user) {
+    throw createHttpError(401, 'User not found');
+  }
+
+  const isEqual = await bcrypt.compare(user.passwordHash, password);
+
+  if (!isEqual) {
+    throw createHttpError(401, 'Unauthorized');
+  }
+
+  await SessionsCollection.deleteOne({ userId: user._id });
+
+  const newSession = createSession();
+
+  return await SessionsCollection.create({
+    userId: user._id,
+    ...newSession,
   });
 };
