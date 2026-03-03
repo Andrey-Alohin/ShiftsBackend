@@ -1,4 +1,4 @@
-import { randomBytes, rendomBytes } from 'crypto';
+import { randomBytes } from 'crypto';
 import { ONE_DAY, ONE_HOUR } from '../constants/index.js';
 
 export const createSession = () => ({

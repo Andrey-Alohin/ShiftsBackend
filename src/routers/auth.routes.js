@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   loginUserController,
   logoutUserController,
+  refreshUserSessionController,
   registerUserController,
 } from '../controllers/auth.controllers.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';

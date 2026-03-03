@@ -1,4 +1,4 @@
-import { SESSION_COOKIES } from '../constants/sessionCookies';
+import { SESSION_COOKIES } from '../constants/sessionCookies.js';
 
 export const setupSession = (res, { refreshToken, _id }) => {
   res.cookie(
