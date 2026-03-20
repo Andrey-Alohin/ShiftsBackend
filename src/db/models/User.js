@@ -1,11 +1,16 @@
 import { model, Schema } from 'mongoose';
+import { ROLES } from '../../constants/index.js';
 
 const userSchema = new Schema(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     passwordHash: { type: String, required: true, select: false },
-    role: { type: String, enum: ['user', 'manager'], default: 'user' },
+    role: {
+      type: String,
+      enum: [ROLES.USER, ROLES.MANAGER],
+      default: ROLES.USER,
+    },
     avatarUrl: { type: String },
     groupId: {
       type: Schema.ObjectId,
