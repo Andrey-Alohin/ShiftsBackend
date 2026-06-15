@@ -4,6 +4,7 @@ import { GroupsCollection } from '../db/models/Group.js';
 import bcrypt from 'bcrypt';
 import { SessionsCollection } from '../db/models/Session.js';
 import { createSession } from '../utils/createSession.js';
+import { isEqual } from 'date-fns';
 
 export const registerUser = async ({ name, email, password, groupId }) => {
   const user = await UsersCollection.findOne({ email });
@@ -25,13 +26,13 @@ export const loginUser = async ({ email, password }) => {
   const user = await UsersCollection.findOne({ email });
 
   if (!user) {
-    throw createHttpError(401, 'User not found');
+    throw createHttpError(401, 'Invalid email or password');
   }
 
-  const isEqual = await bcrypt.compare(user.passwordHash, password);
+  const isEqual = await bcrypt.compare(password, user.passwordHash);
 
   if (!isEqual) {
-    throw createHttpError(401, 'Unauthorized');
+    throw createHttpError(401, 'Invalid email or password');
   }
 
   await SessionsCollection.deleteOne({ userId: user._id });

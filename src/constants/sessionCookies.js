@@ -1,4 +1,4 @@
-import { ONE_DAY } from './index.js';
+import { ONE_DAY } from '../constants/index.js';
 
 export const SESSION_COOKIES = {
   REFRESH_TOKEN: 'refreshToken',

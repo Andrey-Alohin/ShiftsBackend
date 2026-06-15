@@ -1,5 +1,10 @@
 import { SESSION_COOKIES } from '../constants/sessionCookies.js';
-import { loginUser, registerUser } from '../services/auth.services.js';
+import {
+  loginUser,
+  registerUser,
+  logoutUser,
+  refreshUsersSession,
+} from '../services/auth.services.js';
 import { setupSession } from '../utils/setupSession.js';
 
 export const registerUserController = async (req, res) => {
@@ -27,8 +32,9 @@ export const loginUserController = async (req, res) => {
 };
 
 export const logoutUserController = async (req, res) => {
-  if (req.cookie[SESSION_COOKIES.SESSION_ID]) {
-    await logoutUser(req.cookie[SESSION_COOKIES.SESSION_ID]);
+  const sessionId = req.cookies?.[SESSION_COOKIES.SESSION_ID];
+  if (sessionId) {
+    await logoutUser(sessionId);
   }
 
   res.clearCookie(SESSION_COOKIES.SESSION_ID);
@@ -38,7 +44,10 @@ export const logoutUserController = async (req, res) => {
 };
 
 export const refreshUserSessionController = async (req, res) => {
-  const session = await refreshUsersSession(req.cookie);
+  const session = await refreshUsersSession({
+    sessionId: req.cookies?.[SESSION_COOKIES.SESSION_ID],
+    refreshToken: req.cookies?.[SESSION_COOKIES.REFRESH_TOKEN],
+  });
 
   setupSession(res, session);
 

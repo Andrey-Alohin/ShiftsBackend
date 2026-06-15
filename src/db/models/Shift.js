@@ -3,9 +3,15 @@ import { model, Schema } from 'mongoose';
 const ShiftSchema = new Schema(
   {
     user: { type: Schema.ObjectId, ref: 'User', required: true },
-    createdBy: { type: Schema.ObjectId, ref: 'User', required: true },
-    groupId: { type: Schema.ObjectId, ref: 'Group', required: true },
-    weekStart: { type: Date, required: true },
+    actualGroupId: { type: Schema.ObjectId, ref: 'Group', required: true },
+    originGroupId: { type: Schema.ObjectId, ref: 'Group', required: true },
+
+    type: {
+      type: String,
+      enum: ['work', 'day_off'],
+      required: true,
+    },
+
     startAt: { type: Date, required: true },
     endAt: { type: Date, required: true },
     status: {
@@ -13,10 +19,14 @@ const ShiftSchema = new Schema(
       enum: ['planned', 'completed', 'missed'],
       default: 'planned',
     },
+
+    version: { type: Number, required: true, default: 0 },
+
+    createdBy: { type: Schema.ObjectId, ref: 'User', required: true },
   },
   { timestamps: true },
 );
 
-ShiftSchema.index({ groupId: 1, weekStart: 1 });
+ShiftSchema.index({ user: 1, actualGroupId: 1, startAt: 1 });
 
 export const ShiftsCollection = model('Shift', ShiftSchema);
