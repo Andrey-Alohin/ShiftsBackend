@@ -10,11 +10,10 @@ import {
   buildBulkOperations,
 } from '../utils/shift.utils.js';
 import { getEnvVar } from '../utils/getEnvVar.js';
+import { config } from '../config/index.js';
 
 export const postShifts = async ({ user, shifts, tz }) => {
-  const isTzAware = getEnvVar('ENABLE_TIMEZONE_AWARE', 'false') === 'true';
-  const defaultTz = getEnvVar('DEFAULT_TIMEZONE', 'Europe/Kyiv');
-  const useTz = isTzAware && tz ? tz : defaultTz;
+  const useTz = config.timeZoneEnabled && tz ? tz : config.defaultTimeZone;
 
   const session = await mongoose.startSession();
   session.startTransaction();

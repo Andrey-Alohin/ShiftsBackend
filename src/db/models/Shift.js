@@ -14,11 +14,6 @@ const ShiftSchema = new Schema(
 
     startAt: { type: Date, required: true },
     endAt: { type: Date, required: true },
-    status: {
-      type: String,
-      enum: ['planned', 'completed', 'missed'],
-      default: 'planned',
-    },
 
     version: { type: Number, required: true, default: 0 },
 
