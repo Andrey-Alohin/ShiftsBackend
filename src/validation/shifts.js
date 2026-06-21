@@ -30,7 +30,7 @@ const shiftCreateSchema = Joi.object({
 
 const shiftDeleteSchema = Joi.object({
   _id: Joi.string().hex().length(24).required(),
-  verison: Joi.number().greater(-1).required(),
+  version: Joi.number().greater(-1).required(),
 });
 
 const shiftUpdateSchema = shiftCreateSchema.concat(shiftDeleteSchema);

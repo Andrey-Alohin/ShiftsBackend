@@ -19,7 +19,7 @@ const ShiftSchema = new Schema(
 
     createdBy: { type: Schema.ObjectId, ref: 'User', required: true },
   },
-  { timestamps: true },
+  { timestamps: true, versionKey: false },
 );
 
 ShiftSchema.index({ user: 1, actualGroupId: 1, startAt: 1 });
