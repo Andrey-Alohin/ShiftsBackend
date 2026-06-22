@@ -21,7 +21,43 @@ describe('Validation - shifts post (create/update/delete', () => {
 
   const cases = [
     {
-      name: 'valid create|update|delete',
+      name: 'valid create',
+      input: [
+        {
+          operation: 'create',
+          shift: {
+            ...validCreateShift,
+          },
+        },
+      ],
+      shouldPass: true,
+    },
+    {
+      name: 'valid update',
+      input: [
+        {
+          operation: 'update',
+          shift: {
+            ...validUpdateShift,
+          },
+        },
+      ],
+      shouldPass: true,
+    },
+    {
+      name: 'valid delete',
+      input: [
+        {
+          operation: 'delete',
+          shift: {
+            ...validDeleteShift,
+          },
+        },
+      ],
+      shouldPass: true,
+    },
+    {
+      name: 'valid combined create/update/delete',
       input: [
         {
           operation: 'create',
@@ -39,6 +75,34 @@ describe('Validation - shifts post (create/update/delete', () => {
           operation: 'delete',
           shift: {
             ...validDeleteShift,
+          },
+        },
+      ],
+      shouldPass: true,
+    },
+    {
+      name: 'create with milliseconds (.000Z)',
+      input: [
+        {
+          operation: 'create',
+          shift: {
+            ...validCreateShift,
+            startAt: '2025-01-01T10:00:00.000Z',
+            endAt: '2025-01-01T11:00:00.000Z',
+          },
+        },
+      ],
+      shouldPass: true,
+    },
+    {
+      name: 'create without milliseconds (Z)',
+      input: [
+        {
+          operation: 'create',
+          shift: {
+            ...validCreateShift,
+            startAt: '2025-01-01T10:00:00Z',
+            endAt: '2025-01-01T11:00:00Z',
           },
         },
       ],
