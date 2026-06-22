@@ -2,6 +2,23 @@ import { describe, expect, it } from 'vitest';
 import { postShiftsSchema } from './shifts';
 
 describe('Validation - shifts post (create/update/delete', () => {
+  const validCreateShift = {
+    user: '67a21f66299b661d478e9b6a',
+    actualGroupId: '67a21f66299b661d478e9b6a',
+    originGroupId: '67a21f66299b661d478e9b6a',
+    type: 'work',
+    startAt: new Date('2025-01-01T10:00:00Z').toISOString(),
+    endAt: new Date('2025-01-01T12:00:00Z').toISOString(),
+  };
+  const validDeleteShift = {
+    _id: '67a21f66299b661d478e9b6b',
+    version: 1,
+  };
+  const validUpdateShift = {
+    ...validCreateShift,
+    ...validDeleteShift,
+  };
+
   const cases = [
     {
       name: 'valid create|update|delete',
@@ -9,32 +26,19 @@ describe('Validation - shifts post (create/update/delete', () => {
         {
           operation: 'create',
           shift: {
-            user: '67a21f66299b661d478e9b6a',
-            actualGroupId: '67a21f66299b661d478e9b6a',
-            originGroupId: '67a21f66299b661d478e9b6a',
-            type: 'work',
-            startAt: new Date('2025-01-01T10:00:00Z').toISOString(),
-            endAt: new Date('2025-01-01T12:00:00Z').toISOString(),
+            ...validCreateShift,
           },
         },
         {
           operation: 'update',
           shift: {
-            _id: '67a21f66299b661d478e9b6b',
-            version: 0,
-            user: '67a21f66299b661d478e9b6a',
-            actualGroupId: '67a21f66299b661d478e9b6a',
-            originGroupId: '67a21f66299b661d478e9b6a',
-            type: 'work',
-            startAt: new Date('2025-01-01T10:00:00Z').toISOString(),
-            endAt: new Date('2025-01-01T12:00:00Z').toISOString(),
+            ...validUpdateShift,
           },
         },
         {
           operation: 'delete',
           shift: {
-            _id: '67a21f66299b661d478e9b6b',
-            version: 1,
+            ...validDeleteShift,
           },
         },
       ],
@@ -46,12 +50,7 @@ describe('Validation - shifts post (create/update/delete', () => {
         {
           operation: 'save',
           shift: {
-            user: '67a21f66299b661d478e9b6a',
-            actualGroupId: '67a21f66299b661d478e9b6a',
-            originGroupId: '67a21f66299b661d478e9b6a',
-            type: 'work',
-            startAt: new Date('2025-01-01T10:00:00Z').toISOString(),
-            endAt: new Date('2025-01-01T12:00:00Z').toISOString(),
+            ...validCreateShift,
           },
         },
       ],
@@ -76,12 +75,8 @@ describe('Validation - shifts post (create/update/delete', () => {
         {
           operation: 'create',
           shift: {
-            user: '67a21f66299b661d478e9b6a',
-            actualGroupId: '67a21f66299b661d478e9b6a',
-            originGroupId: '67a21f66299b661d478e9b6a',
-            type: 'work',
-            startAt: '2025-01-01 10:00:00Z',
-            endAt: new Date('2025-01-01T12:00:00Z').toISOString(),
+            ...validCreateShift,
+            startAt: '2025-01-01T10:00:00+2:00',
           },
         },
       ],

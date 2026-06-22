@@ -12,7 +12,12 @@ const shiftCreateSchema = Joi.object({
   actualGroupId: Joi.string().hex().length(24).required(),
   originGroupId: Joi.string().hex().length(24).required(),
   type: Joi.string().valid('work', 'day_off').required(),
-  startAt: Joi.string().isoDate().custom(isUTC).required(),
+  startAt: Joi.string()
+    .pattern(
+      /^[2][0][0-9][0-9]-([0][1-9]|[1][0-2])-([0-2][0-9]|[3][0-1])T([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9][0-9][0-9]Z|Z)$/,
+    )
+    .custom(isUTC)
+    .required(),
   endAt: Joi.string().isoDate().custom(isUTC).required(),
 }).custom((values, helpers) => {
   const start = new Date(values.startAt);
