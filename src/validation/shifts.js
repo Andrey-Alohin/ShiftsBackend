@@ -44,7 +44,7 @@ export const postShiftsSchema = Joi.array()
   .min(1)
   .items(
     Joi.object({
-      operation: Joi.string().valid('create', 'update', 'delete'),
+      operation: Joi.string().valid('create', 'update', 'delete').required(),
       shift: Joi.alternatives()
         .conditional('operation', {
           switch: [

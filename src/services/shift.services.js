@@ -3,7 +3,11 @@ import createHttpError from 'http-errors';
 import { ShiftsCollection } from '../db/models/Shift.js';
 import { UsersCollection } from '../db/models/User.js';
 import { GroupsCollection } from '../db/models/Group.js';
-import { normalizeShift } from '../utils/normalizeShift.js';
+import {
+  normalizeAndCategorizeOperations,
+  normalizeOperation,
+  normalizeShift,
+} from '../utils/normalizeOperation.js';
 import {
   validateInternalOverlaps,
   validateExternalOverlaps,
@@ -12,7 +16,7 @@ import {
 import { getEnvVar } from '../utils/getEnvVar.js';
 import { config } from '../config/index.js';
 
-export const postShifts = async ({ user, shifts, tz }) => {
+export const postShifts = async ({ user, operations, tz }) => {
   const useTz = config.timeZoneEnabled && tz ? tz : config.defaultTimeZone;
 
   const session = await mongoose.startSession();
@@ -20,8 +24,8 @@ export const postShifts = async ({ user, shifts, tz }) => {
 
   try {
     // 1. Нормалізація
-    const normalized = shifts.map((shift) => normalizeShift(shift, useTz));
-
+    const { categorized, allUserIds, allGroupIds } =
+      normalizeAndCategorizeOperations(operations);
     // 2. Валідація внутрішніх конфліктів
     validateInternalOverlaps(normalized);
 

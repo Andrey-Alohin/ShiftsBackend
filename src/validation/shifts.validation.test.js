@@ -121,6 +121,41 @@ describe('Validation - shifts post (create/update/delete', () => {
       shouldPass: false,
     },
     {
+      name: 'missing operation field',
+      input: [
+        {
+          shift: {
+            ...validCreateShift,
+          },
+        },
+      ],
+      shouldPass: false,
+    },
+    {
+      name: 'operation = null',
+      input: [
+        {
+          operation: null,
+          shift: {
+            ...validCreateShift,
+          },
+        },
+      ],
+      shouldPass: false,
+    },
+    {
+      name: 'operation = empty string',
+      input: [
+        {
+          operation: '',
+          shift: {
+            ...validCreateShift,
+          },
+        },
+      ],
+      shouldPass: false,
+    },
+    {
       name: 'invalid shift object',
       input: [
         {
