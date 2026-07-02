@@ -53,7 +53,7 @@ export const normalizeAndCategorizeOperations = (operations, tz) => {
       groupIds.add(normalizedShift.originGroupId.toString());
 
       const startTs = normalizedShift.startAt.getTime();
-      const endTs = normalizeShiftData.endAt.getTime();
+      const endTs = normalizedShift.endAt.getTime();
 
       if (minStartTime === null || startTs < minStartTime) {
         minStartTime = startTs;

@@ -6,9 +6,9 @@ import { isOverlap } from './dateUtil.js';
  */
 export const validateInternalOverlaps = (normalized) => {
   for (let i = 0; i < normalized.length; i++) {
-    const { shift: current } = normalized[i];
+    const current = normalized[i];
     for (let j = i + 1; j < normalized.length; j++) {
-      const { shift: other } = normalized[j];
+      const other = normalized[j];
       if (
         current.user.toString() === other.user.toString() &&
         isOverlap(current.startAt, current.endAt, other.startAt, other.endAt)
@@ -26,19 +26,24 @@ export const validateInternalOverlaps = (normalized) => {
  * Перевірка на накладення з існуючими записами в БД (у пам'яті)
  */
 export const validateExternalOverlaps = (normalized, existingShifts) => {
+  //мап виглядає парою з назва параметру id користувача : значення масив змін цього користувача
   const existingMap = new Map();
+
   for (const shift of existingShifts) {
     const userId = shift.user.toString();
     if (!existingMap.has(userId)) existingMap.set(userId, []);
     existingMap.get(userId).push(shift);
   }
 
-  for (const current of normalized) {
-    const userShifts = existingMap.get(current.user.toString()) || [];
+  for (const shift of normalized) {
+    const userShifts = existingMap.get(shift.user.toString()) || [];
     const conflict = userShifts.find((ex) => {
-      if (current._id && current._id.toString() === ex._id.toString())
+      // Якщо це оновлення тієї ж самої зміни, це не конфлікт.
+      // Перевіряємо, чи існують обидва _id, перш ніж їх порівнювати.
+      if (shift._id && ex._id && shift._id.toString() === ex._id.toString()) {
         return false;
-      return isOverlap(current.startAt, current.endAt, ex.startAt, ex.endAt);
+      }
+      return isOverlap(shift.startAt, shift.endAt, ex.startAt, ex.endAt);
     });
 
     if (conflict) {
@@ -53,24 +58,30 @@ export const validateExternalOverlaps = (normalized, existingShifts) => {
 /**
  * Побудова операцій для bulkWrite
  */
-export const buildBulkOperations = (normalized, creatorId) => {
-  return normalized.map((current) => {
-    if (current._id) {
-      const { _id, version, ...updateData } = current;
-      return {
-        updateOne: {
-          filter: { _id, version },
-          update: {
-            $set: updateData,
-            $inc: { version: 1 },
-          },
+export const buildBulkOperations = (categorized, creatorId) => {
+  const createOps = categorized.create.map((doc) => ({
+    insertOne: {
+      document: { ...doc, createdBy: creatorId },
+    },
+  }));
+
+  const updateOps = categorized.update.map(
+    ({ _id, version, ...updateData }) => ({
+      updateOne: {
+        filter: { _id, version },
+        update: {
+          $set: updateData,
+          $inc: { version: 1 },
         },
-      };
-    }
-    return {
-      insertOne: {
-        document: { ...current, createdBy: creatorId },
       },
-    };
-  });
+    }),
+  );
+
+  const deleteOps = categorized.delete.map(({ _id, version }) => ({
+    deleteOne: {
+      filter: { _id, version }, // Важливо передавати version для оптимістичного блокування
+    },
+  }));
+
+  return [...createOps, ...updateOps, ...deleteOps];
 };
