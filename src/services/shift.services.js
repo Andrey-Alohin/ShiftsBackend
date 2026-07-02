@@ -29,7 +29,9 @@ export const postShifts = async ({ user, operations, tz }) => {
       allUserIds,
       allGroupIds,
       dataBounds: { minStartDate, maxEndDate },
-    } = normalizeAndCategorizeOperations(operations);
+    } = normalizeAndCategorizeOperations(operations, tz);
+
+    const normalized = categorized.create.concat(categorized.update);
     // 2. Валідація внутрішніх конфліктів
     validateInternalOverlaps(normalized);
 
@@ -53,8 +55,8 @@ export const postShifts = async ({ user, operations, tz }) => {
     // 4. Отримання конфліктів з БД одним запитом
     const existingShifts = await ShiftsCollection.find({
       user: { $in: userIds },
-      startAt: { $lt: maxEnd },
-      endAt: { $gt: minStart },
+      startAt: { $lt: minStartDate },
+      endAt: { $gt: maxEndDate },
     })
       .session(session)
       .lean();

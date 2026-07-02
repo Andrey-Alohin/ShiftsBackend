@@ -6,9 +6,9 @@ import { isOverlap } from './dateUtil.js';
  */
 export const validateInternalOverlaps = (normalized) => {
   for (let i = 0; i < normalized.length; i++) {
-    const current = normalized[i];
+    const { shift: current } = normalized[i];
     for (let j = i + 1; j < normalized.length; j++) {
-      const other = normalized[j];
+      const { shift: other } = normalized[j];
       if (
         current.user.toString() === other.user.toString() &&
         isOverlap(current.startAt, current.endAt, other.startAt, other.endAt)
