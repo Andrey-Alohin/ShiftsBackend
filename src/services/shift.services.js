@@ -24,43 +24,31 @@ export const postShifts = async ({ user, operations, tz }) => {
 
   try {
     // 1. Нормалізація
-    const { categorized, allUserIds, allGroupIds } =
-      normalizeAndCategorizeOperations(operations);
+    const {
+      categorized,
+      allUserIds,
+      allGroupIds,
+      dataBounds: { minStartDate, maxEndDate },
+    } = normalizeAndCategorizeOperations(operations);
     // 2. Валідація внутрішніх конфліктів
     validateInternalOverlaps(normalized);
 
-    // 3. Валідація існування сутностей та підготовка меж пошуку
-    const userIds = [...new Set(normalized.map((s) => s.user.toString()))];
-    const groupIds = [
-      ...new Set(
-        normalized.flatMap((s) => [
-          s.actualGroupId.toString(),
-          s.originGroupId.toString(),
-        ]),
-      ),
-    ];
-
+    // 3. Перевірка на існування користувачів і груп
     const [usersInDb, groupsInDb] = await Promise.all([
-      UsersCollection.countDocuments({ _id: { $in: userIds } }).session(
+      UsersCollection.countDocuments({ _id: { $in: allUserIds } }).session(
         session,
       ),
-      GroupsCollection.countDocuments({ _id: { $in: groupIds } }).session(
+      GroupsCollection.countDocuments({ _id: { $in: allGroupIds } }).session(
         session,
       ),
     ]);
 
-    if (usersInDb !== userIds.length) {
+    if (usersInDb !== allUserIds.length) {
       throw createHttpError(400, 'One or more users do not exist');
     }
-    if (groupsInDb !== groupIds.length) {
+    if (groupsInDb !== allGroupIds.length) {
       throw createHttpError(400, 'One or more groups do not exist');
     }
-
-    const startTimes = normalized.map((s) => s.startAt.getTime());
-    const endTimes = normalized.map((s) => s.endAt.getTime());
-
-    const minStart = new Date(Math.min(...startTimes));
-    const maxEnd = new Date(Math.max(...endTimes));
 
     // 4. Отримання конфліктів з БД одним запитом
     const existingShifts = await ShiftsCollection.find({
