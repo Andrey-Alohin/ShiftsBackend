@@ -15,6 +15,7 @@ const userSchema = new Schema(
     groupId: {
       type: Schema.ObjectId,
       ref: 'Group',
+      required: true,
     },
   },
   { timestamps: true, versionKey: false },

@@ -5,11 +5,16 @@ import { requireRoles } from '../middlewares/requireRoles.js';
 import { ROLES } from '../constants/index.js';
 import { ctrlWrapper } from '../utils/ctrlWrapper.js';
 import { postShiftsSchema } from '../validation/shifts.js';
-import { postShiftsController } from '../controllers/shift.controllers.js';
+import {
+  getScheduleWeeklyController,
+  postShiftsController,
+} from '../controllers/shift.controllers.js';
 
 const router = Router();
 
 router.use(authenticate);
+
+router.get('/schedule/weekly', ctrlWrapper(getScheduleWeeklyController));
 
 router.post(
   '/',

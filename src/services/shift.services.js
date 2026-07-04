@@ -3,11 +3,7 @@ import createHttpError from 'http-errors';
 import { ShiftsCollection } from '../db/models/Shift.js';
 import { UsersCollection } from '../db/models/User.js';
 import { GroupsCollection } from '../db/models/Group.js';
-import {
-  normalizeAndCategorizeOperations,
-  normalizeOperation,
-  normalizeShift,
-} from '../utils/normalizeOperation.js';
+import { normalizeAndCategorizeOperations } from '../utils/normalizeOperation.js';
 import {
   validateInternalOverlaps,
   validateExternalOverlaps,
@@ -15,6 +11,8 @@ import {
 } from '../utils/shift.utils.js';
 import { getEnvVar } from '../utils/getEnvVar.js';
 import { config } from '../config/index.js';
+import { getWeekBounds } from '../utils/getWeekBounds.js';
+import { assertUtcISOString } from '../utils/dateUtil.js';
 
 export const postShifts = async ({ user, operations, tz }) => {
   const useTz = config.timeZoneEnabled && tz ? tz : config.defaultTimeZone;
@@ -62,10 +60,11 @@ export const postShifts = async ({ user, operations, tz }) => {
     // 5. Валідація зовнішніх конфліктів
     validateExternalOverlaps(normalized, existingShifts);
 
-    // 6. Виконання Bulk операцій
+    // 6. Побудова Bulk операцій
     const bulkOps = buildBulkOperations(categorized, user._id);
 
     if (bulkOps.length > 0) {
+      // 7. Виконання Bulk операцій
       const result = await ShiftsCollection.bulkWrite(bulkOps, { session });
 
       const updateOpsCount = categorized.update.length;
@@ -91,4 +90,34 @@ export const postShifts = async ({ user, operations, tz }) => {
   } finally {
     await session.endSession();
   }
+};
+
+export const getWeeklySchedule = async ({ user, date, tz }) => {
+  const useTz = config.timeZoneEnabled && tz ? tz : config.defaultTimeZone;
+
+  // 1. Визначити базову дату. Якщо дата не передана, беремо поточну.
+  const baseDate = date ? assertUtcISOString(date) : new Date();
+
+  // 2. Отримати межі тижня з урахуванням часової зони.
+  const { weekStart, weekEnd } = getWeekBounds(baseDate, useTz);
+
+  // 3. Отримати ID "домашньої" групи користувача.
+  const userGroupId = user.groupId;
+
+  // 4. Сформувати запит до БД.
+  const shifts = await ShiftsCollection.find({
+    // Знайти всі зміни, які перетинаються з нашим тижнем.
+    startAt: { $lt: weekEnd },
+    endAt: { $gt: weekStart },
+    // Або це колеги з моєї групи, або "гості" в моїй групі.
+    $or: [{ originGroupId: userGroupId }, { actualGroupId: userGroupId }],
+  })
+    .populate('user', 'name email') // Одразу отримати дані користувачів.
+    .sort({ startAt: 1 }) // Відсортувати для зручності на фронтенді.
+    .lean(); // .lean() для кращої продуктивності при читанні.
+
+  return {
+    shifts,
+    weekBounds: { start: weekStart.toISOString(), end: weekEnd.toISOString() },
+  };
 };
