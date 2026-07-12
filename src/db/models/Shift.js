@@ -8,7 +8,7 @@ const ShiftSchema = new Schema(
 
     type: {
       type: String,
-      enum: ['work', 'day_off'],
+      enum: ['work', 'day_off', 'sick_leave', 'vacation'],
       required: true,
     },
 
