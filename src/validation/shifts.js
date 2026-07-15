@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { SHIFT_TYPE_VALUES } from '../constants/shiftTypes.js';
+import { SHIFT_TYPE_VALUES, SHIFT_TYPES } from '../constants/shiftTypes.js';
 
 const isUTC = (values, helpers) => {
   if (!values.endsWith('Z')) {
@@ -21,17 +21,21 @@ const shiftCreateSchema = Joi.object({
     )
     .custom(isUTC)
     .required(),
-  endAt: Joi.string().isoDate().custom(isUTC).required(),
+  endAt: Joi.string()
+    .pattern(
+      /^[2][0][0-9][0-9]-([0][1-9]|[1][0-2])-([0-2][0-9]|[3][0-1])T([0-1][0-9]|[2][0-3]):[0-5][0-9]:[0-5][0-9](\.[0-9][0-9][0-9]Z|Z)$/,
+    )
+    .custom(isUTC)
+    .when('type', {
+      is: SHIFT_TYPES.WORK,
+      then: Joi.required(),
+      otherwise: Joi.optional(),
+    }),
 }).custom((values, helpers) => {
-  const start = new Date(values.startAt);
-  const end = new Date(values.endAt);
-
-  if (isNaN(start) || isNaN(end)) {
-    return helpers.error('any.invalid');
-  }
-
-  if (start >= end) {
-    return helpers.message('startAt must be less than endAt');
+  if (values.type === SHIFT_TYPES.WORK) {
+    if (new Date(values.startAt) >= new Date(values.endAt)) {
+      return helpers.message('startAt must be less than endAt');
+    }
   }
   return values;
 }, 'Time validation');
