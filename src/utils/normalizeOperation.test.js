@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { normalizeAndCategorizeOperations } from './normalizeOperation.js';
+import { SHIFT_TYPES } from '../constants/shiftTypes.js';
 
 describe('normalizeAndCategorizeOperations utility', () => {
   const tz = 'Europe/Kyiv';
@@ -15,7 +16,7 @@ describe('normalizeAndCategorizeOperations utility', () => {
         operation: 'create',
         shift: {
           ...mockIds,
-          type: 'work',
+          type: SHIFT_TYPES.WORK,
           startAt: '2025-01-01T10:00:00.000Z',
           endAt: '2025-01-01T18:00:00.000Z',
         },
@@ -54,7 +55,7 @@ describe('normalizeAndCategorizeOperations utility', () => {
         operation: 'update',
         shift: {
           ...mockIds,
-          type: 'day_off',
+          type: SHIFT_TYPES.DAY_OFF,
           startAt: '2025-01-01T12:00:00Z', // Mid-day, should be adjusted to full day
         },
       },
@@ -71,13 +72,57 @@ describe('normalizeAndCategorizeOperations utility', () => {
     expect(result.endAt.toISOString()).toBe('2025-01-01T22:00:00.000Z');
   });
 
+  it('should correctly calculate full day range for a "sick_leave" shift', () => {
+    const operations = [
+      {
+        operation: 'create',
+        shift: {
+          ...mockIds,
+          type: SHIFT_TYPES.SICK_LEAVE,
+          startAt: '2025-01-01T15:00:00Z', // Time should be ignored
+        },
+      },
+    ];
+
+    const { categorized } = normalizeAndCategorizeOperations(operations, tz);
+
+    expect(categorized.create).toHaveLength(1);
+    const result = categorized.create[0];
+
+    // For Europe/Kyiv (GMT+2 in winter), 2025-01-01 00:00 is 2024-12-31 22:00 UTC
+    expect(result.startAt.toISOString()).toBe('2024-12-31T22:00:00.000Z');
+    // And 2025-01-02 00:00 is 2025-01-01 22:00 UTC
+    expect(result.endAt.toISOString()).toBe('2025-01-01T22:00:00.000Z');
+  });
+
+  it('should correctly calculate full day range for a "vacation" shift', () => {
+    const operations = [
+      {
+        operation: 'update',
+        shift: {
+          ...mockIds,
+          type: SHIFT_TYPES.VACATION,
+          startAt: '2025-01-01T08:00:00Z', // Time should be ignored
+        },
+      },
+    ];
+
+    const { categorized } = normalizeAndCategorizeOperations(operations, tz);
+
+    expect(categorized.update).toHaveLength(1);
+    const result = categorized.update[0];
+
+    expect(result.startAt.toISOString()).toBe('2024-12-31T22:00:00.000Z');
+    expect(result.endAt.toISOString()).toBe('2025-01-01T22:00:00.000Z');
+  });
+
   it('should not require endAt for "day_off" shifts', () => {
     const operations = [
       {
         operation: 'create',
         shift: {
           ...mockIds,
-          type: 'day_off',
+          type: SHIFT_TYPES.DAY_OFF,
           startAt: '2025-01-01T12:00:00Z',
           // endAt is intentionally missing
         },
@@ -99,7 +144,7 @@ describe('normalizeAndCategorizeOperations utility', () => {
         operation: 'create',
         shift: {
           ...mockIds,
-          type: 'day_off',
+          type: SHIFT_TYPES.DAY_OFF,
           startAt: '2025-03-30T12:00:00Z', // Day of DST spring forward in Ukraine
         },
       },
@@ -142,7 +187,7 @@ describe('normalizeAndCategorizeOperations utility', () => {
         operation: 'create',
         shift: {
           ...mockIds,
-          type: 'work',
+          type: SHIFT_TYPES.WORK,
           startAt: '2025-01-01T10:00:00', // Missing 'Z'
           endAt: '2025-01-01T18:00:00.000Z',
         },
@@ -160,7 +205,7 @@ describe('normalizeAndCategorizeOperations utility', () => {
         operation: 'create',
         shift: {
           ...mockIds,
-          type: 'work',
+          type: SHIFT_TYPES.WORK,
           startAt: '2025-01-01T18:00:00.000Z',
           endAt: '2025-01-01T10:00:00.000Z', // end is before start
         },
@@ -194,7 +239,7 @@ describe('normalizeAndCategorizeOperations utility', () => {
           user: 'user1',
           actualGroupId: 'group1',
           originGroupId: 'group2',
-          type: 'work',
+          type: SHIFT_TYPES.WORK,
           startAt: '2025-02-01T08:00:00.000Z', // Earliest start
           endAt: '2025-02-01T16:00:00.000Z',
         },
@@ -208,7 +253,7 @@ describe('normalizeAndCategorizeOperations utility', () => {
           user: 'user2',
           actualGroupId: 'group3',
           originGroupId: 'group1', // Duplicate group ID
-          type: 'work',
+          type: SHIFT_TYPES.WORK,
           startAt: '2025-02-01T10:00:00.000Z',
           endAt: '2025-02-01T20:00:00.000Z', // Latest end
         },

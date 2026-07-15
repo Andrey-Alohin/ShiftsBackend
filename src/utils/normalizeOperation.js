@@ -3,6 +3,7 @@ import {
   assertValidInterval,
   buildUtcDayRange,
 } from './dateUtil.js';
+import { FULL_DAY_SHIFT_TYPES } from '../constants/shiftTypes.js';
 
 /**
  * Нормалізує дати для однієї зміни (для операцій create/update).
@@ -12,7 +13,7 @@ import {
  * @returns {object} - Нормалізований об'єкт зміни з датами у форматі Date.
  */
 const normalizeShiftData = (shift, tz) => {
-  if (shift.type === 'day_off') {
+  if (FULL_DAY_SHIFT_TYPES.includes(shift.type)) {
     // Для вихідного дня нам потрібна лише одна дата, щоб визначити добу
     const date = assertUtcISOString(shift.startAt);
     return {

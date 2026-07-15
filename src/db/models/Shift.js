@@ -1,4 +1,5 @@
 import { model, Schema } from 'mongoose';
+import { SHIFT_TYPE_VALUES } from '../../constants/shiftTypes.js';
 
 const ShiftSchema = new Schema(
   {
@@ -8,7 +9,7 @@ const ShiftSchema = new Schema(
 
     type: {
       type: String,
-      enum: ['work', 'day_off', 'sick_leave', 'vacation'],
+      enum: SHIFT_TYPE_VALUES,
       required: true,
     },
 

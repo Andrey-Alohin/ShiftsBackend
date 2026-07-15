@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { postShiftsSchema } from './shifts';
+import { SHIFT_TYPES } from '../constants/shiftTypes.js';
 
 describe('Validation - shifts post (create/update/delete', () => {
   const validCreateShift = {
     user: '67a21f66299b661d478e9b6a',
     actualGroupId: '67a21f66299b661d478e9b6a',
     originGroupId: '67a21f66299b661d478e9b6a',
-    type: 'work',
+    type: SHIFT_TYPES.WORK,
     startAt: new Date('2025-01-01T10:00:00Z').toISOString(),
     endAt: new Date('2025-01-01T12:00:00Z').toISOString(),
   };
@@ -107,6 +108,52 @@ describe('Validation - shifts post (create/update/delete', () => {
         },
       ],
       shouldPass: true,
+    },
+    {
+      name: 'valid create day_off without endAt',
+      input: [
+        {
+          operation: 'create',
+          shift: {
+            user: '67a21f66299b661d478e9b6a',
+            actualGroupId: '67a21f66299b661d478e9b6a',
+            originGroupId: '67a21f66299b661d478e9b6a',
+            type: SHIFT_TYPES.DAY_OFF,
+            startAt: '2025-01-01T10:00:00Z',
+          },
+        },
+      ],
+      shouldPass: true,
+    },
+    {
+      name: 'invalid create work without endAt',
+      input: [
+        {
+          operation: 'create',
+          shift: {
+            user: '67a21f66299b661d478e9b6a',
+            actualGroupId: '67a21f66299b661d478e9b6a',
+            originGroupId: '67a21f66299b661d478e9b6a',
+            type: SHIFT_TYPES.WORK,
+            startAt: '2025-01-01T10:00:00Z',
+          },
+        },
+      ],
+      shouldPass: false,
+    },
+    {
+      name: 'invalid create work with endAt before startAt',
+      input: [
+        {
+          operation: 'create',
+          shift: {
+            ...validCreateShift,
+            type: SHIFT_TYPES.WORK,
+            endAt: '2025-01-01T09:00:00Z',
+          },
+        },
+      ],
+      shouldPass: false,
     },
     {
       name: 'invalid operation',

@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { SHIFT_TYPE_VALUES } from '../constants/shiftTypes.js';
 
 const isUTC = (values, helpers) => {
   if (!values.endsWith('Z')) {
@@ -12,7 +13,7 @@ const shiftCreateSchema = Joi.object({
   actualGroupId: Joi.string().hex().length(24).required(),
   originGroupId: Joi.string().hex().length(24).required(),
   type: Joi.string()
-    .valid('work', 'day_off', 'sick_leave', 'vacation')
+    .valid(...SHIFT_TYPE_VALUES)
     .required(),
   startAt: Joi.string()
     .pattern(
