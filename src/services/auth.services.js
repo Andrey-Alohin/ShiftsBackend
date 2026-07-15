@@ -4,7 +4,6 @@ import { GroupsCollection } from '../db/models/Group.js';
 import bcrypt from 'bcrypt';
 import { SessionsCollection } from '../db/models/Session.js';
 import { createSession } from '../utils/createSession.js';
-import { isEqual } from 'date-fns';
 
 export const registerUser = async ({ name, email, password, groupId }) => {
   const user = await UsersCollection.findOne({ email });
