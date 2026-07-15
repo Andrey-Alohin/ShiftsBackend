@@ -8,7 +8,7 @@ import { toZonedTime, fromZonedTime } from 'date-fns-tz';
  */
 export function getWeekBounds(date, tz) {
   // 1. Інтерпретуємо UTC дату в контексті часової зони користувача.
-  const zonedDate = toZonedTimeWithOptions(date, tz);
+  const zonedDate = toZonedTime(date, tz);
 
   // 2. Знаходимо початок та кінець тижня в цій часовій зоні (понеділок - перший день).
   const weekStartInZone = startOfWeek(zonedDate, { weekStartsOn: 1 });
