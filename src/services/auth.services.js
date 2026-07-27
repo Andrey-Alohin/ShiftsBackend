@@ -22,7 +22,7 @@ export const registerUser = async ({ name, email, password, groupId }) => {
 };
 
 export const loginUser = async ({ email, password }) => {
-  const user = await UsersCollection.findOne({ email });
+  const user = await UsersCollection.findOne({ email }).select('+passwordHash');
 
   if (!user) {
     throw createHttpError(401, 'Invalid email or password');
