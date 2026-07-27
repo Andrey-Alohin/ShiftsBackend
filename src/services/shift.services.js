@@ -113,6 +113,8 @@ export const getWeeklySchedule = async ({ user, date, tz }) => {
     $or: [{ originGroupId: userGroupId }, { actualGroupId: userGroupId }],
   })
     .populate('user') // Одразу отримати дані користувачів.
+    .populate('actualGroupId')
+    .populate('originGroupId')
     .sort({ startAt: 1 }) // Відсортувати для зручності на фронтенді.
     .lean(); // .lean() для кращої продуктивності при читанні.
 
