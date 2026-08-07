@@ -24,6 +24,7 @@ const groupSchema = new Schema(
   {
     name: { type: String, required: true },
     managerId: { type: Schema.ObjectId, ref: 'User', required: true },
+    number: { type: Number, required: true },
     schedule: {
       type: [dayScheduleSchema],
       default: DEFAULT_WEEKLY_SCHEDULE,
