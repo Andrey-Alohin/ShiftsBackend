@@ -6,8 +6,8 @@ const DEFAULT_WEEKLY_SCHEDULE = [
   { day: 3, isOpen: true, openTime: '08:00', closeTime: '21:00' },
   { day: 4, isOpen: true, openTime: '08:00', closeTime: '21:00' },
   { day: 5, isOpen: true, openTime: '08:00', closeTime: '21:00' },
-  { day: 6, isOpen: true, openTime: '09:00', closeTime: '19:00' },
-  { day: 7, isOpen: true, openTime: '09:00', closeTime: '19:00' },
+  { day: 6, isOpen: true, openTime: '08:00', closeTime: '19:00' },
+  { day: 7, isOpen: true, openTime: '08:00', closeTime: '19:00' },
 ];
 
 const dayScheduleSchema = new Schema(
