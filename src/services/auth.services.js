@@ -5,7 +5,14 @@ import bcrypt from 'bcrypt';
 import { SessionsCollection } from '../db/models/Session.js';
 import { createSession } from '../utils/createSession.js';
 
-export const registerUser = async ({ name, email, password, groupId }) => {
+export const registerUser = async ({
+  firstName,
+  lastName,
+  middleName,
+  email,
+  password,
+  groupId,
+}) => {
   const user = await UsersCollection.findOne({ email });
   if (user) throw createHttpError(409, 'Email already in use');
   const group = await GroupsCollection.findById(groupId);
@@ -13,7 +20,9 @@ export const registerUser = async ({ name, email, password, groupId }) => {
   const encryptedPassword = await bcrypt.hash(password, 10);
 
   return await UsersCollection.create({
-    name,
+    firstName,
+    lastName,
+    middleName,
     email,
     passwordHash: encryptedPassword,
     groupId,
